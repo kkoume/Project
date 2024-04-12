@@ -1,0 +1,140 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/admin/layout/adminLayout.html}">
+<section id="productList" layout:fragment="content">
+    <script>
+        window.onload = function (){
+            const allCheckbox = document.querySelector('input[name="all"]');
+            const selectedProdCheckboxes = document.querySelectorAll('input[name="selectedProd"]');
+
+            allCheckbox.addEventListener('click', function () {
+                selectedProdCheckboxes.forEach(function (checkbox) {
+                    checkbox.checked = allCheckbox.checked;
+                });
+            });
+
+            const productDelete = document.getElementById('productDelete');
+
+            productDelete.onclick = function (e){
+                e.preventDefault();
+                var selectedProd = document.getElementsByName('selectedProd');
+                var selectedProdList = [];
+                var rowsToDelete = [];
+
+                selectedProd.forEach(function (checkbox) {
+                    if (checkbox.checked){
+                        var prodNo = checkbox.parentElement.nextElementSibling.nextElementSibling.textContent;
+                        selectedProdList.push(prodNo);
+                        var row = checkbox.closest('tr');
+                        rowsToDelete.push(row);
+
+                    }
+                });
+
+                console.log(selectedProdList);
+                var result = confirm("제품 삭제를 진행하시겠습니까?");
+                if (result){
+                    const jsonDate = {
+                        prodNo : selectedProdList
+                    };
+                    fetchPut(`/farmstory/admin/product/delete`, jsonDate)
+                        .then(data => {
+                            console.log(data); // 서버로부터 받은 데이터 출력 또는 처리
+                            alert("삭제되었습니다.");
+                            rowsToDelete.forEach(function (row) {
+                                row.remove();
+                                if (allCheckbox.checked){
+                                    allCheckbox.checked = false;
+                                }
+                            });
+                        })
+                        .catch(error => {
+                            console.error(error); // 오류 처리
+                        });
+                }
+
+            }
+        }
+    </script>
+
+    <nav>
+        <h3>상품목록</h3>
+    </nav>
+
+    <article>
+
+        <!-- 검색 폼 -->
+        <table border="0">
+            <tr>
+                <td>
+                    <!-- 검색 폼 -->
+                    <form th:action="@{/admin/product/list}" method="get">
+                        <label for="keyword">상품명:</label>
+                        <input type="text" id="keyword" name="keyword" placeholder="상품명을 입력하세요">
+
+                        <label for="type">카테고리:</label>
+                        <select id="type" name="type">
+                            <option value="">전체</option>
+                            <option value="1">과일</option>
+                            <option value="2">야채</option>
+                            <option value="3">곡류</option>
+                        </select>
+
+                        <button type="submit">검색</button>
+                    </form>
+                </td>
+            </tr>
+        </table>
+
+        <table border="0">
+            <tr>
+                <th><input type="checkbox" name="all"/></th>
+                <th>사진</th>
+                <th>상품번호</th>
+                <th>상품명</th>
+                <th>구분</th>
+                <th>가격</th>
+                <th>재고</th>
+                <th>등록일</th>
+            </tr>
+            <tr th:each="products, index:${productPageResponseDTO.dtoList}" id="product">
+                <td><input type="checkbox" name="selectedProd"/></td>
+                <td><img th:src="@{/uploads/__${products.image1}__}" class="thumb" alt="샘플1"></td>
+                <td>[[${products.prodNo}]]</td>
+                <td><a th:href="@{'/admin/product/modify?prodNo=' + ${products.prodNo}}">[[${products.prodName}]]</a></td>
+                <td>[[${products.cateName}]]</td>
+                <td>[[${products.prodPrice}]]원</td>
+                <td>[[${products.prodStock}]]</td>
+                <td th:text="${#temporals.format(products.RegProdDate, 'yyyy-MM-dd')}"></td>
+            </tr>
+        </table>
+
+        <p>
+            <a href="#" id="productDelete">선택삭제</a>
+            <a th:href="@{/admin/product/register}" class="productRegister">상품등록</a>
+        </p>
+
+        <p class="paging">
+                <span th:if="${productPageResponseDTO.prev}" >
+                    <a th:href="@{/admin/product/list(pg=${productPageResponseDTO.start - 1})}"><</a>
+                </span>
+            <span th:each="num:${#numbers.sequence(productPageResponseDTO.start, productPageResponseDTO.end)}">
+                <a th:if="${num != 0}" th:href="@{/admin/product/list(pg=${num})}" th:class="${num == 1} ? 'on' : ''">[ [[${num}]] ]</a>
+            </span>
+            <span th:if="${productPageResponseDTO.next}">
+                     <a th:href="@{/admin/product/list(pg=${productPageResponseDTO.end + 1})}">></a>
+                </span>
+        </p>
+
+    </article>
+
+</section>
+
+
+</html>
+<style>
+    table tr td a:hover {
+        text-decoration: underline; /* 호버 시 밑줄 추가 */
+        cursor: pointer; /* 호버 시 커서 모양 변경 */
+    }
+</style>

@@ -1,0 +1,154 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout/marketLayout.html}">
+
+
+            <article class="list" layout:fragment="content">
+                <nav>
+                    <img th:src="@{/assets/img/sub_nav_tit_cate2_tit1.png}" alt="장보기"/>
+                    <p>
+                        HOME > 장보기 > <em>장보기</em>
+                    </p>
+                </nav>
+
+                <!-- 내용 시작 -->
+                <script>
+                    window.onload=function (e){
+                        const cate = [[${cate}]];
+                        console.log(cate);
+                        if(cate != null){
+                            if(cate == '1'){
+                                document.getElementById('cate1').style.color='black';
+                            }else if(cate == '2'){
+                                document.getElementById('cate2').style.color='black';
+                            }else{
+                                document.getElementById('cate3').style.color='black';
+                            }
+                        }
+                    }
+                </script>
+                <form id="marketForm" th:action="@{/market/list}" method="get" style="float: right;">
+                    <label for="keyword">상품명:</label>
+                    <input type="text" id="keyword" name="keyword" placeholder="상품명을 입력하세요">
+                    <th:block th:if="${cate != null}">
+                        <input type="hidden" name="cate" th:value="${cate}">
+                    </th:block>
+                    <button type="button" onclick="submitForm()">검색</button>
+                </form>
+                <!-- 검색 폼 -->
+                <p class="sort">
+                    <a  th:href="@{/market/list}" class="on">전체([[${products.total}]]) |</a>
+                    <a th:href="@{/market/list(cate = 1)}" id="cate1">과일 |</a>
+                    <a th:href="@{/market/list(cate = 2)}" id="cate2">야채 |</a>
+                    <a th:href="@{/market/list(cate = 3)}" id="cate3">곡류</a>
+                </p>
+
+
+                <!-- 이미지를 출력하는 부분 -->
+                <br>
+                <br>
+                <table border="0">
+                    <div th:if="${products.dtoList.size() < 1}">
+                        <p>등록된 상품이 없습니다</p>
+                    </div>
+                    <div class="product-container">
+                        <div th:each="product, iterStat: ${products.dtoList}" style="width: 25%; padding: 10px; box-sizing: border-box; float: left;">
+                            <div style="border: 1px solid #ccc; height: 293.5px; border-radius: 5px; padding: 10px; display: flex; flex-direction: column;" >
+                                <!-- 이미지 출력하는 부분 -->
+                                <a th:href="@{/market/view(prodNum=${product.prodNo})}">
+                                    <img th:src="@{/uploads/__${product.image1}__}" class="product-item" alt="상품 이미지" style="width: 100%; max-height: 200px; object-fit: cover;  " >
+                                </a>
+                                <div style="padding: 10px;">
+                                    <span class="type" style="font-weight: bold; color: #333; margin-bottom: 5px;">[[${product.cateName}]]</span>
+                                    <p class="title"
+                                       style="margin-bottom: 5px; height: 34px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                                        <a th:href="@{/market/view(prodNum=${product.prodNo})}">[[${product.prodName}]]</a></p>
+                                    <p class="point" style="margin-bottom: 5px;">[[${product.point}]] 포인트 적립</p>
+                                    <p class="price" style="margin-bottom: 5px;">
+                                       <strong th:text="${#numbers.formatDecimal(product.prodPrice * (100 - product.prodDiscount)*0.01 , 1, 0)}+'원'" style="font-weight: bold; font-size: large" ></strong>
+                                        <del>[[${product.prodPrice}]]원</del>
+                                    </p>
+                                    <span class="discount" style="margin-bottom: 5px; color: red ; font-weight: bold">[[${product.prodDiscount}]] % </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="clear: both;"></div>
+                    </div>
+                </table>
+
+
+                <p class="paging"  style="text-align: center">
+                    <th:block th:if="${cate == null && keyword != null}">
+                        <th:block th:if="${products.prev}" class="page-item ">
+                            <a  class="page-link prev"  th:href="@{/market/list(pg=${products.start -1}, keyword=${keyword})}">&#60;</a>
+                        </th:block>
+                        <th:block th:each="num:${#numbers.sequence(products.start, products.end)}" class="page-item ">
+                            <th:block th:if="${num == products.getPg()}">
+                                <a class="page-link"  th:href="@{/market/list(pg=${num}, keyword=${keyword})}">[[${num}]]</a>
+                            </th:block>
+                            <th:block th:if="${num != products.getPg()}">
+                                <a class="page-link "  th:href="@{/market/list( pg=${num}, keyword=${keyword})}">[[${num}]]</a>
+                            </th:block>
+                        </th:block>
+                        <th:block th:if="${products.next}" class="page-item">
+                            <a class="page-link next"   th:href="@{/market/list(pg=${products.end+1}, keyword=${keyword})}">&#62;</a>
+                        </th:block>
+                    </th:block>
+
+                    <th:block th:if="${cate != null && keyword == null}">
+                        <th:block th:if="${products.prev}" class="page-item ">
+                            <a  class="page-link prev" th:href="@{/market/list(pg=${products.start -1}, cate = ${cate})}">&#60;</a>
+                        </th:block>
+                        <th:block th:each="num:${#numbers.sequence(products.start, products.end)}" class="page-item ">
+                            <th:block th:if="${num == products.getPg()}">
+                                <a class="page-link"  th:href="@{/market/list(pg=${num}, cate = ${cate})}">[[${num}]]</a>
+                            </th:block>
+                            <th:block th:if="${num != products.getPg()}">
+                                <a class="page-link "  th:href="@{/market/list( pg=${num}, cate = ${cate})}">[[${num}]]</a>
+                            </th:block>
+                        </th:block>
+                        <th:block th:if="${products.next}" class="page-item">
+                            <a class="page-link next"  th:href="@{/market/list(pg=${products.end+1}, cate = ${cate})}">&#62;</a>
+                        </th:block>
+                    </th:block>
+
+                    <th:block th:if="${cate != null && keyword != null}">
+                        <th:block th:if="${products.prev}" class="page-item ">
+                            <a  class="page-link prev" th:href="@{/market/list(pg=${products.start -1}, cate = ${cate}, keyword=${keyword})}">&#60;</a>
+                        </th:block>
+                        <th:block th:each="num:${#numbers.sequence(products.start, products.end)}" class="page-item ">
+                            <th:block th:if="${num == products.getPg()}">
+                                <a class="page-link"  th:href="@{/market/list(pg=${num}, cate = ${cate},  keyword=${keyword})}">[[${num}]]</a>
+                            </th:block>
+                            <th:block th:if="${num != products.getPg()}">
+                                <a class="page-link "  th:href="@{/market/list( pg=${num}, cate = ${cate},  keyword=${keyword})}">[[${num}]]</a>
+                            </th:block>
+                        </th:block>
+                        <th:block th:if="${products.next}" class="page-item">
+                            <a class="page-link next"  th:href="@{/market/list(pg=${products.end+1}, cate = ${cate},  keyword=${keyword})}">&#62;</a>
+                        </th:block>
+                    </th:block>
+
+                    <th:block th:if="${cate == null && keyword == null}">
+                        <th:block th:if="${products.prev}" class="page-item ">
+                            <a  class=" prev" th:href="@{/market/list(pg=${products.start -1}, keyword=${keyword})}">&#60;</a>
+                        </th:block>
+                        <th:block th:each="num:${#numbers.sequence(products.start, products.end)}" class="page-item ">
+                            <th:block th:if="${num == products.getPg()}">
+                                <a class="page-link" th:href="@{/market/list(pg=${num},  keyword=${keyword})}">[[${num}]]</a>
+                            </th:block>
+                            <th:block th:if="${num != products.getPg()}">
+                                <a class="page-link "  th:href="@{/market/list( pg=${num}, keyword=${keyword})}">[[${num}]]</a>
+                            </th:block>
+                        </th:block>
+                        <th:block th:if="${products.next}" class="page-item">
+                            <a class="page-link next"  th:href="@{/market/list(pg=${products.end+1}, keyword=${keyword})}">&#62;</a>
+                        </th:block>
+                    </th:block>
+                </p>
+
+                <!-- 내용 끝 -->
+
+            </article>
+
+</html>

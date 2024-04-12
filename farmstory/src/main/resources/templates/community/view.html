@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout/articleLayout.html}">
+
+
+<div id="sub" layout:fragment="content">
+    <script>
+
+        // 페이지 로드가 완료되면 실행
+        window.onload = function () {
+            // cateName이 일치하면 해당 li에 class="on" 추가
+            const classOnTarget = document.getElementById('[[${cateName.cate}]]');
+            classOnTarget.classList.add("on");
+
+            // 파일 다운로드 카운트 동적 처리
+            const fileLinks = document.getElementsByClassName('fileLink');
+
+            for (const fileLink of fileLinks) {
+                // 파일 다운로드 시 다운로드 횟수 증가
+                fileLink.onclick = async function () {
+                    const count = this.nextElementSibling.innerText;
+                    this.nextElementSibling.innerText = parseInt(count) + 1;
+                }
+            }
+
+            const commentList = document.getElementsByClassName('commentList')[0];
+            const btnRemove = commentList.getElementsByClassName('remove');
+            const btnSubmit = document.commentForm.submit;
+            const form = document.commentForm;
+
+            // 댓글 삭제 이벤트 처리
+            document.addEventListener('click', function (e) {
+                if (e.target.classList.contains('remove')) {
+                    e.preventDefault();
+
+                    const no = e.target.dataset.no;
+                    const parent = e.target.dataset.parent;
+
+                    // 댓글 삭제 요청
+                    fetch(`/farmstory/community/deleteComment/${no}`, {
+                        method: 'DELETE'
+                    })
+                        .then(response => {
+                            if (response.ok) {
+                                return response.json();
+                            } else {
+                                throw new Error('Network response was not ok.');
+                            }
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                const article = e.target.closest('article');
+                                article.remove();
+                                alert('삭제 되었습니다.');
+                            } else {
+                                alert('삭제에 실패하였습니다.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('삭제 도중 에러가 발생하였습니다.');
+                        });
+                }
+            });
+
+            // 댓글 입력 이벤트 처리
+            btnSubmit.onclick = function (e) {
+                e.preventDefault();
+
+                const parent = form.parent.value;
+                const writer = form.writer.value;
+                const content = form.content.value;
+
+                // 입력된 내용이 없는 경우 처리
+                if (!content.trim()) {
+                    alert('댓글을 입력해주세요.');
+                    return;
+                }
+
+                const jsonData = {
+                    "parent": parent,
+                    "writer": writer,
+                    "content": content
+                };
+
+                // 댓글 추가 요청
+                fetch('/farmstory/community/insertComment', {
+                    method: 'POST',
+                    headers: { "Content-type": "application/json" },
+                    body: JSON.stringify(jsonData)
+                })
+                    .then((resp) => resp.json())
+                    .then((data) => {
+                        if (data.pk > 0) {
+                            const today = new Date();
+                            const year = today.getFullYear();
+                            const month = today.getMonth() + 1;
+                            const date = today.getDate();
+
+                            const commentArticle = `<article>
+                        <span class="nick">${sessUser.nick}</span>
+                        <span class="date">${year}-${month}-${date}</span>
+                        <p class="content">${content}</p>
+                        <div>
+                            <a href="#" data-no="${data.pk}" data-parent="${data.parent}" class="remove">삭제</a>
+                            <a href="#" class="modify">수정</a>
+                        </div>
+                    </article>`;
+                            // 댓글 목록에 삽입
+                            commentList.insertAdjacentHTML('beforeend', commentArticle);
+                        }
+                        alert('댓글이 추가되었습니다.');
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                    });
+            }
+
+            // 수정 폼 숨기기
+            function hideEditForm() {
+                const editForms = document.querySelectorAll('.editForm');
+                editForms.forEach(form => {
+                    form.style.display = 'none';
+                });
+            }
+
+            hideEditForm(); // 페이지 로드 시 숨김
+
+            // 댓글 수정 버튼 클릭 이벤트 처리
+            document.addEventListener('click', function (e) {
+                if (e.target.classList.contains('modify')) {
+                    e.preventDefault();
+                    const article = e.target.closest('article');
+                    const commentContent = article.querySelector('.content');
+                    const editForm = article.querySelector('.editForm');
+
+                    // 댓글 내용 설정
+                    const content = commentContent.innerText;
+                    editForm.querySelector('textarea[name="content"]').value = content;
+
+                    // 댓글 수정 폼 표시 및 버튼 숨김
+                    commentContent.style.display = 'none';
+                    editForm.style.display = 'block';
+                    e.target.style.display = 'none';
+                }
+            });
+
+            // 취소 버튼 클릭 시 수정 폼 숨기기
+            document.addEventListener('click', function (e) {
+                if (e.target.classList.contains('cancelEdit')) {
+                    e.preventDefault();
+                    const editForm = e.target.closest('.editForm');
+                    const commentContent = editForm.parentElement.querySelector('.content');
+
+                    // 수정 폼 숨김 및 댓글 내용 표시
+                    editForm.style.display = 'none';
+                    commentContent.style.display = 'block';
+
+                    // 수정 버튼 표시
+                    const modifyButton = editForm.parentElement.querySelector('.modify');
+                    modifyButton.style.display = 'inline-block';
+                }
+            });
+
+            // 댓글 수정 폼 제출 이벤트 처리
+            document.addEventListener('submit', function (e) {
+                e.preventDefault();
+                if (e.target.classList.contains('editForm')) {
+                    const formData = new FormData(e.target);
+                    const jsonData = {};
+                    formData.forEach((value, key) => jsonData[key] = value);
+
+                    // 댓글 수정 요청
+                    fetch('/farmstory/community/modifyComment', {
+                        method: 'PUT',
+                        headers: { "Content-type": "application/json" },
+                        body: JSON.stringify(jsonData)
+                    })
+                        .then(response => {
+                            if (response.ok) {
+                                return response.json();
+                            } else {
+                                throw new Error('Network response was not ok.');
+                            }
+                        })
+                        .then(data => {
+                            // 수정 성공 시 댓글 내용 업데이트
+                            const modifiedComment = e.target.closest('article');
+                            const contentElement = modifiedComment.querySelector('.content');
+                            contentElement.innerText = data.article.content;
+
+                            // 수정 폼 숨김 및 댓글 내용 표시
+                            const editForm = modifiedComment.querySelector('.editForm');
+                            editForm.style.display = 'none';
+                            contentElement.style.display = 'block';
+
+                            // 수정 버튼 표시
+                            const modifyButton = modifiedComment.querySelector('.modify');
+                            modifyButton.style.display = 'inline-block';
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('댓글 수정 도중 에러가 발생하였습니다.');
+                        });
+                }
+            });
+
+            // 댓글쓰기 취소 버튼 클릭 이벤트 처리(textarea 내용 삭제)
+            document.addEventListener('click', function (e) {
+                if (e.target.classList.contains('btnCancel')) {
+                    e.preventDefault();
+                    const commentForm = document.forms['commentForm'];
+                    commentForm.reset(); // textarea 내용 초기화
+                }
+            });
+
+        }
+
+
+    </script>
+    <div><img  th:src="@{/assets/img/sub_top_tit3.png}" alt="COMMUNITY"></div>
+    <section class="community">
+        <aside>
+            <img th:src="@{/assets/img/sub_aside_cate3_tit.png}" alt="커뮤니티"/>
+
+            <ul class="lnb">
+                <li class="" id="notice"><a th:href="@{/community/list(cate='notice')}">공지사항</a></li>
+                <li class="" id="menu"><a th:href="@{/community/list(cate='menu')}">오늘의식단</a></li>
+                <li class="" id="chef"><a th:href="@{/community/list(cate='chef')}">나도요리사</a></li>  <!-- on 추가 -->
+                <li class="" id="qna"><a th:href="@{/community/list(cate='qna')}">1:1고객문의</a></li>  <!-- on 추가 -->
+                <li class="" id="faq"><a th:href="@{/community/list(cate='faq')}">자주묻는질문</a></li>  <!-- on 추가 -->
+            </ul>
+
+        </aside>
+        <article>
+            <nav>
+                <img th:src="@{/assets/img/__${cateName.cate}__.png}" alt="커뮤니티"/> <!-- ??-->
+                <p>
+                    HOME > 커뮤니티 > <em>[[${cateName.boardName}]]</em> <!-- 완료 -->
+                </p>
+            </nav>
+
+            <!-- 내용 시작 -->
+            <div id="board">
+                <section class="view">
+                    <input type="hidden" name="no" th:value="${articleDTO.getNo()}" />
+                    <input type="hidden" name="cate" th:value="${cateName.getCate()}" />
+                    <input type="hidden" name="nick" th:value="${articleDTO.getNick()}" />
+                    <table border="0">
+                        <tr>
+                            <th>제목</th>
+                            <td><input type="text" name="title" th:value="${articleDTO.title}" readonly/></td>
+                        </tr>
+                        <th:block th:if="${articleDTO.fileList != null && not #lists.isEmpty(articleDTO.fileList)}">
+                            <tr>
+                                <th>파일</th>
+                                <td>
+                                    <th:block th:each="file : ${articleDTO.fileList}">
+                                        <p style="margin-top:4px;">
+                                            <a th:href="@{/file/download/{fno}(fno=${file.fno})}" class="fileLink" th:data-fno="${file.fno}">[[${file.oName}]]</a>
+                                            <span>[[${file.download}]]</span>회 다운로드
+                                        </p>
+                                    </th:block>
+                                </td>
+                            </tr>
+                        </th:block>
+                        <tr>
+                            <th>내용</th>
+                            <td>
+                                <textarea name="content" readonly>[[${articleDTO.content}]]</textarea>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div>
+                        <!-- 삭제 버튼 -->
+                        <th:block th:if="${#authentication.principal != 'anonymousUser'}">
+                            <a th:if="${#authentication.principal.user.uid == articleDTO.writer}"
+                               th:href="@{/community/delete(cate=${cateName.cate}, no=${articleDTO.getNo()})}" class="btn btnRemove">삭제</a>
+                        </th:block>
+                        <!-- 수정 버튼 -->
+                        <th:block th:if="${#authentication.principal != 'anonymousUser'}">
+                            <a th:if="${#authentication.principal.user.uid == articleDTO.writer}"
+                               th:href="@{/community/modify(cate=${cateName.cate}, no=${articleDTO.getNo()})}" class="btn  btnModify">수정</a>
+                        </th:block>
+
+
+
+                        <a th:href="@{/community/list(cate=${cateName.cate})}" class="btn btnList">목록</a>
+                    </div>
+
+                    <!-- 댓글목록 -->
+                    <section class="commentList">
+                        <h3>댓글목록</h3>
+                        <th:block th:each="comment : ${comments}">
+                            <article>
+                                <span class="nick" th:text="${comment.nick}"></span>
+                                <span class="date" th:text="${#strings.substring(comment.rdate, 2, 10)}"></span>
+                                <p class="content" th:text="${comment.content}"></p>
+                                <div>
+                                    <th:block th:if="${#authentication.principal != 'anonymousUser'}">
+                                        <a th:if="${#authentication.principal.user.uid == comment.writer}" href="#" class="remove" th:data-no="${comment.no}" th:data-parent="${comment.parent}">삭제</a>
+                                        <a th:if="${#authentication.principal.user.uid == comment.writer}" href="#" class="modify">수정</a>
+                                    </th:block>
+                                </div>
+                                <!-- 댓글 수정 폼 -->
+                                <form class="editForm" style="display: none;">
+                                    <input type="hidden" name="no" th:value="${comment.no}" />
+                                    <input type="hidden" name="parent" th:value="${comment.parent}" />
+                                    <input type="hidden" name="writer" th:value="${comment.writer}" />
+                                    <textarea name="content" th:text="${comment.content}"></textarea>
+                                    <div class="button-group">
+                                        <input type="submit" value="댓글수정" class="submitEdit" >
+                                        <button type="button" class="cancelEdit">취소</button>
+                                    </div>
+                                </form>
+
+                            </article>
+
+                        </th:block>
+
+                        <th:block th:if="${#lists.isEmpty(comments)}">
+                            <p class="empty">등록된 댓글이 없습니다.</p>
+                        </th:block>
+                    </section>
+
+                    <!-- 댓글쓰기 -->
+                    <th:block th:if="${#authorization.expression('isAuthenticated()')}">
+                        <section class="commentForm">
+                            <h3>댓글쓰기</h3>
+                            <form name="commentForm" th:action="@{/community/insertComment}" method="post"  id="formModify">
+                                <input type="hidden" name="parent" th:value="${articleDTO.no}">
+                                <input type="hidden" name="writer" th:value="${#authentication.principal.user.uid}">
+                                <textarea name="content" placeholder="댓글 입력"></textarea>
+                                <div>
+                                    <a th:href="@{#}" class="btn btnCancel">취소</a>
+                                    <input type="submit" name="submit" value="작성완료" id="btnSubmit" class="btn btnComplete"/>
+                                </div>
+                            </form>
+                        </section>
+                    </th:block>
+
+                </section>
+            </div>
+            <!-- 내용 끝 -->
+
+        </article>
+    </section>
+
+</div>
+
+</html>

@@ -1,0 +1,209 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout/marketLayout.html}">
+
+<article class="cart" layout:fragment="content">
+    <script>
+        window.onload = function () {
+
+            //전체 체크박스 선택
+            const selectAllCheckbox = document.getElementById('selectAll');
+            const individualCheckboxes = document.querySelectorAll('.select');
+
+            selectAllCheckbox.onclick= function (){
+                individualCheckboxes.forEach(function(checkbox) {
+                    checkbox.click();
+                });
+
+            }
+
+            //체크박스 선택
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('select') && e.target.type === 'checkbox') {
+                        calculateTotal();
+                }
+            });
+
+            //장바구니 삭제
+            const del = document.getElementById('del');
+            del.onclick=function (e){
+                const list = [];
+                individualCheckboxes.forEach(async function(checkbox) {
+                    if(checkbox.checked){
+                        list.push(checkbox.value);
+                            checkbox.closest('tr').remove();
+                    }
+                });
+                //DB로 보내기
+                const jsonData = {list : list};
+                const result =  fetchPut('/farmstory/market/cart/delete',jsonData);
+                calculateTotal();
+            }
+
+            //주문하기 버튼 클릭
+            const btnOrder = document.getElementById('btnOrder');
+
+            btnOrder.onclick = function (){
+                const form = document.getElementById('buyForm');
+                if ( document.getElementById('cateSize').innerText === "" || document.getElementById('cateSize').innerText ==="0"){
+                    alert('주문하려는 상품을 선택해주세요');
+                }else{
+                    form.submit();
+                }
+            }
+
+            calculateTotal();
+
+        };
+        function calculateTotal() {
+            const form = document.getElementById('buyForm');
+            var totalPrice = 0;
+            var productPrice =0;
+            var totalPoint =0;
+            var cateSize =0;
+            var totalSize = 0;
+
+            const checkboxes = document.querySelectorAll('.select');
+            //할인전 가격
+            var prices = document.querySelectorAll('.prodcutPrice');
+            //포인트 계산
+            const points = document.querySelectorAll('.point');
+            //할인된 가격
+            var productsPrice = document.querySelectorAll('.price');
+            //상품수 계산
+            const  cartCount =document.querySelectorAll('.cartCount');
+
+            checkboxes.forEach(function(checkbox, index) {
+                totalSize++;
+                if (checkbox.checked) {
+                    cateSize += parseFloat(cartCount[index].innerText.replace(',', ''));
+                    totalPoint += parseFloat(points[index].innerText.replace(',', ''));
+                    productPrice += parseFloat(prices[index].innerText.replace(',', ''));
+                    totalPrice += parseFloat(productsPrice[index].innerText.replace(',', ''));
+
+                    const existingInput = form.querySelector('input[name="cartNo"][value="' + checkbox.value + '"]');
+                    if (!existingInput) {
+                        const hiddenInput = document.createElement('input');
+                        hiddenInput.type = 'hidden';
+                        hiddenInput.name = 'cartNo';
+                        hiddenInput.value = checkbox.value;
+                        form.appendChild(hiddenInput);
+                    }
+                }
+            });
+
+            //전체 토탈 금액 (배송비까지 계산)
+            var deliveryFee = 0;
+            var discountTotal = productPrice - totalPrice;
+            if(totalPrice<30000 && totalPrice>1){
+                deliveryFee=5000;
+                totalPrice+=5000;
+            }
+
+            document.getElementById('totalPrice').innerText = numberWithCommas(totalPrice)+'원';
+            document.getElementById('delivery').innerText = numberWithCommas(deliveryFee)+'원';
+            document.getElementById('cateSize').innerText = numberWithCommas(cateSize);
+            document.getElementById('counts').innerText = numberWithCommas(totalSize);
+            document.getElementById('totalPoints').innerText = numberWithCommas(totalPoint)+'원';
+            document.getElementById('totalProductPrice').innerText = numberWithCommas(productPrice)+'원';
+            document.getElementById('discountTotal').innerText = numberWithCommas(discountTotal)+'원';
+        }
+
+        // 숫자를 천 단위로 콤마를 찍는 함수
+        function numberWithCommas(x) {
+            return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+    </script>
+    <nav>
+        <img th:src="@{/assets/img/sub_nav_tit_cate2_tit1.png}" alt="장보기"/>
+        <p>
+            HOME > 장보기 > <em>장보기</em>
+        </p>
+    </nav>
+                    <!-- 내용 시작 -->
+
+                    <p class="sort"  >
+                        <a href="#" class="on">장바구니 전체 [<span id="counts">[[${carts.size()}]]</span>]</a>
+                    </p>
+                    <table border="0" >
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input type="checkbox" name="all" id="selectAll">
+                                </th>
+                                <th>이미지</th>
+                                <th>종류</th>
+                                <th>상품명</th>
+                                <th>수량</th>
+                                <th>할인</th>
+                                <th>포인트</th>
+                                <th>가격</th>
+                                <th>소계</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="empty" th:if="${carts.size()<1}">
+                                <td colspan="9">장바구니에 상품이 없습니다.</td>
+                            </tr>
+
+                            <tr th:each="cart, index:${carts}">
+                                <td>
+                                    <input type="hidden" name="cateNo" th:value="${cart.cartNo}">
+                                    <input type="hidden" name="prodNo" class="prodNo" th:value="${products[index.index].prodNo}">
+                                    <input type="checkbox" name="select" class="select" th:value="${cart.cartNo}">
+                                </td>
+                                <td>
+                                    <a th:href="@{/market/view(prodNum=${products[index.index].prodNo})}"
+                                    ><img th:src="@{/uploads/__${products[index.index].image1}__}" class="thumb" alt="샘플1" style="width: 100px"></a>
+                                </td>
+                                <td>[[${cates[index.index].cateName}]]</td>
+                                <td><a href="#">[[${products[index.index].prodName}]]</a></td>
+                                <td class="cartCount">[[${cart.cartProdCount}]]</td>
+                                <td>[[${products[index.index].prodDiscount}]] %</td>
+                                <td class="point" >[[${products[index.index].point * cart.cartProdCount}]]</td>
+                                <td class="prodcutPrice" >[[${products[index.index].prodPrice *  cart.cartProdCount}]]</td>
+                                <td ><strong class="price"
+                                             th:text="${#numbers.formatDecimal(products[index.index].prodPrice* (100 - products[index.index].prodDiscount)*0.01 * cart.cartProdCount, 1, 0)}">
+                                </strong>원</td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                    <input type="button" name="del" id="del" value="선택삭제">
+
+                    <div class="info">                        
+                        <table border="0">
+                            <caption>전체합계</caption>                            
+                            <tr>
+                                <th>상품수</th>
+                                <td id="cateSize"></td>
+                            </tr>
+                            <tr>
+                                <th>상품금액</th>
+                                <td id="totalProductPrice"></td>
+                            </tr>
+                            <tr>
+                                <th>할인금액</th>
+                                <td id="discountTotal"></td>
+                            </tr>
+                            <tr>
+                                <th>배송비</th>
+                                <td id="delivery"></td>
+                            </tr>
+                            <tr>
+                                <th>적립 포인트</th>
+                                <td id="totalPoints"></td>
+                            </tr>
+                            <tr>
+                                <th>전체주문금액</th>
+                                <td class="total"  id="totalPrice"></td>
+                            </tr>
+                        </table>
+                        <input type="submit" class="btnOrder" id="btnOrder" value="주문하기">
+                    </div>
+                    <!-- 내용 끝 -->
+    <form id="buyForm" th:action="@{/market/order}" method="POST">
+        <input type="hidden" name="user" th:value="${#authentication.principal.user.uid}">
+    </form>
+</article>
+</html>

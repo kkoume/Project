@@ -1,0 +1,140 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/admin/layout/adminLayout.html}">
+
+<section id="productRegister" layout:fragment="content">
+    <script>
+        /**가격 입력시 포인트 자동 계산**/
+
+        function calculatePoint() {
+            var priceInput = document.getElementById("price").value;
+            var pointInput = document.getElementById("point");
+
+            // 입력값이 숫자인지 확인
+            if (!isNaN(priceInput) && priceInput !== "") {
+                var price = parseFloat(priceInput);
+                var point = price * 0.01;
+                // 가격의 1% 계산
+                pointInput.value = point.toFixed(0);
+            } else {
+                pointInput.value = "";
+                // 가격이 숫자가 아니거나 비어 있으면 포인트 초기화
+            }
+        }
+
+        window.onload= function (){
+
+            calculatePoint();
+
+            const priceInput = document.getElementById('price');
+
+            // 입력 필드가 변경될 때마다 포인트 재계산
+            priceInput.addEventListener('input', function() {
+                calculatePoint();
+            });
+
+
+            const btnSubmit = document.getElementById('btnSubmit');
+
+
+            btnSubmit.onclick = function (e){
+
+                e.preventDefault();
+
+                document.productRegisterForm.submit();
+            }
+
+        }
+
+    </script>
+
+    <nav>
+        <h3>상품수정</h3>
+    </nav>
+        <article>
+            <form th:action="@{/product/modify}" method="post" name="productRegisterForm" enctype="multipart/form-data">
+                <table border="0">
+                    <tr>
+                        <td>상품명</td>
+                        <td><input type="text" name="prodName" th:value="${prod.prodName}"/></td>
+                    </tr>
+                    <tr>
+                        <td>종류</td>
+                        <td>
+                            <select name="cateNo">
+                                <option th:selected="${prod.getCateNo() eq null}" value="">종류</option>
+                                <option th:selected="${prod.getCateNo() eq 1}" value="1">과일</option>
+                                <option th:selected="${prod.getCateNo() eq 2}" value="2">야채</option>
+                                <option th:selected="${prod.getCateNo() eq 3}" value="3">곡류</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>가격</td>
+                        <td><input type="text" name="prodPrice" id="price" oninput="validateNumber(this)" onkeyup="calculatePoint()" th:value="${prod.prodPrice}" /></td>
+                    </tr>
+                    <tr>
+                        <td>포인트</td>
+                        <td>
+                            <input type="text" name="point" id="point" readonly/>
+                            포인트는 가격의 1%
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>할인</td>
+                        <td>
+                            <select name="prodDiscount">
+                                <option th:selected="${prod.getProdDiscount() eq 5}" value="5">5%</option>
+                                <option th:selected="${prod.getProdDiscount() eq 12}" value="12">12%</option>
+                                <option th:selected="${prod.getProdDiscount() eq 15}" value="15">15%</option>
+                                <option th:selected="${prod.getProdDiscount() eq 18}" value="18">18%</option>
+                                <option th:selected="${prod.getProdDiscount() eq 20}" value="20">20%</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>배송비</td>
+                        <td>
+                            <label><input type="radio" name="delivery" th:checked="${prod.getDelivery() eq 2000}" value="2000">2,000원</label>
+                            <label><input type="radio" name="delivery" th:checked="${prod.getDelivery() eq 3000}" value="3000">3,000원</label>
+                            <label><input type="radio" name="delivery" th:checked="${prod.getDelivery() eq 5000}" value="5000">5,000원</label>
+                            <label><input type="radio" name="delivery" th:checked="${prod.getDelivery() eq 0}" value="0">무료</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>재고</td>
+                        <td><input type="text" name="prodStock" oninput="validateNumber(this)"  th:value="${prod.prodStock}"/></td>
+                    </tr>
+                    <tr>
+                        <td>상품이미지</td>
+                        <td>
+                            <p>
+                                <span>상품목록 이미지(약 120 x 120)</span>
+                                <input type="file" name="multImage1"/>
+                            </p>
+                            <p>
+                                <span>기본정보 이미지(약 240 x 240)</span>
+                                <input type="file" name="multImage2"/>
+                            </p>
+                            <p>
+                                <span>상품설명 이미지(약 750 x Auto)</span>
+                                <input type="file" name="multImage3"/>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>기타</td>
+                        <td>
+                            <textarea name="etc"></textarea>
+                        </td>
+                    </tr>
+                </table>
+            <p>
+                <a th:href="@{/admin/product/list}" class="btnCancel">취소</a>
+                <input type="submit" id="btnSubmit" value="상품등록"/>
+            </p>
+        </form>
+    </article>
+</section>
+
+</html>

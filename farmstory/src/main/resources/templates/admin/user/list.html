@@ -1,0 +1,88 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/admin/layout/adminLayout.html}">
+
+
+<section id="userList" layout:fragment="content">
+    <script>
+
+        function sort(columnName) {
+            const currentUrl = new URL(window.location.href);
+            const sortParam = currentUrl.searchParams.get('sort');
+
+            // 현재 정렬 방식에 따라 반대로 변경된 정렬 방식을 계산
+            const newSortParam = (sortParam === `${columnName}-desc`) ?
+                `${columnName}-asc` : `${columnName}-desc`;
+
+            currentUrl.searchParams.set('sort', newSortParam);
+            window.location.href = currentUrl.toString();
+        }
+
+        function saveGrade(selectElement) {
+            var selectedGrade = selectElement.value;
+            var uid = selectElement.dataset.uid;
+            console.log("UserID :" + uid+ ",grade : " +selectedGrade);
+
+            const jsonData = {
+                "uid" : uid,
+                "grade" : selectedGrade
+            }
+            console.log(jsonData);
+
+            const data = fetchPut(`/farmstory/admin/user/modifyGrade`, jsonData);
+            console.log(data);
+
+            alert("수정이 완료되었습니다.");
+
+        }
+    </script>
+    <nav>
+        <h3>회원목록</h3>
+    </nav>
+    <article>
+        <table border="0">
+            <tr>
+                <th data-sortable="true" onclick="sort('uid')">아이디<br/> <i class="fas fa-sort"></i></th>
+                <th data-sortable="true" onclick="sort('name')">이름 <br/><i class="fas fa-sort"></i></th>
+                <th data-sortable="true" onclick="sort('email')">이메일 <br/><i class="fas fa-sort"></i></th>
+                <th data-sortable="true">휴대폰</th>
+                <th data-sortable="true" onclick="sort('grade')">등급 <br/><i class="fas fa-sort"></i></th>
+                <th data-sortable="true" onclick="sort('totalPrice')">총구매액 <br/><i class="fas fa-sort"></i></th>
+                <th data-sortable="true" onclick="sort('regDate')">가입일 <br/><i class="fas fa-sort"></i>  </th>
+                <th>확인</th>
+            </tr>
+            <tr th:each="users, index:${userPageResponseDTO.dtoList}" id="user">
+                <td>[[${users.uid}]]</td>
+                <td>[[${users.name}]]</td>
+                <td>[[${users.email}]]</td>
+                <td>[[${users.hp}]]</td>
+                <td>
+                    <select name="grade" onchange="saveGrade(this)" th:data-uid="${users.uid}">
+                        <option th:selected="${users.getGrade() eq '1'}" value="1">Bronze</option>
+                        <option th:selected="${users.getGrade() eq '2'}" value="2">Silver</option>
+                        <option th:selected="${users.getGrade() eq '3'}" value="3">Gold</option>
+                        <option th:selected="${users.getGrade() eq '4'}" value="4">Platinum</option>
+                        <option th:selected="${users.getGrade() eq '5'}" value="5">Diamond</option>
+                    </select>
+                </td>
+                <td>[[${users.totalPrice}]]</td>
+                <td th:text="${#temporals.format(users.regDate, 'yyyy-MM-dd')}"></td>
+                <td><a th:href="@{/admin/user/detail(uid=${users.uid})}">[상세확인]</a></td>
+            </tr>
+        </table>
+
+        <p class="paging">
+            <span th:if="${userPageResponseDTO.prev}">
+                <a th:href="@{/admin/user/list(pg=${userPageResponseDTO.start - 1}, sort=${param.sort})}">&lt;</a>
+            </span>
+                    <span th:each="num : ${#numbers.sequence(userPageResponseDTO.start, userPageResponseDTO.end)}">
+                <a th:if="${num != 0}" th:href="@{/admin/user/list(pg=${num}, sort=${param.sort})}" th:class="${num == 1} ? 'on' : ''">[[${num}]]</a>
+            </span>
+                    <span th:if="${userPageResponseDTO.next}">
+                <a th:href="@{/admin/user/list(pg=${userPageResponseDTO.end + 1}, sort=${param.sort})}">&gt;</a>
+            </span>
+        </p>
+    </article>
+</section>
+
+</html>

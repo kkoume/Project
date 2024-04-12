@@ -1,0 +1,48 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns="http://www.w3.org/1999/html"
+      layout:decorate="~{/admin/layout/adminLayout.html}">
+
+    <section id="orderList" layout:fragment="content">
+        <nav>
+            <h3>주문목록</h3>
+        </nav>
+            <article>
+                <table border="0">
+                    <tr>
+                        <th>주문번호</th>
+                        <th>상품명</th>
+                        <th>배송비</th>
+                        <th>합계</th>
+                        <th>주문자</th>
+                        <th>주문일</th>
+                        <th>확인</th>
+                    </tr>
+                    <tr th:each="order, index:${lists.dtoList}">
+                        <td>[[${order.orderNo}]]</td>
+                        <td>[[${order.productName}]] 외 [[${order.totalCount}]]개</td>
+                        <td>[[${order.delivery}]] 원</td>
+                        <td>[[${order.totalFee}]] 원</td>
+                        <td>[[${order.orderName}]]</td>
+                        <td th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd')}"></td>
+                        <td><a th:href="@{/admin/order/detail(orderNo = ${order.orderNo})}">[상세확인]</a></td>
+                    </tr>
+                </table>
+
+                <p class="paging">
+
+                        <span th:if="${lists.prev}" class="page-item ">
+                            <a class="page-link" th:href="@{/admin/order/list( pg=${lists.start -1})}">&#60;</a>
+                        </span>
+
+                        <span th:each="num:${#numbers.sequence(lists.start, lists.end)}" class="page-item">
+                            <a class="page-link" th:href="@{/admin/order/list(pg=${num})}">[ [[${num}]] ]</a>
+                        </span>
+
+                        <span th:if="${lists.next}" class="page-item">
+                            <a class="page-link" th:href="@{/admin/order/list( pg=${lists.end+1})}">&#62;</a>
+                        </span>
+
+                </p>
+            </article>
+        </section>
+</html>

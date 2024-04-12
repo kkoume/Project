@@ -1,0 +1,534 @@
+/* 전체 스타일 초기화 */
+* {
+    margin: 0;
+    padding: 0;
+    font: normal 12px '고딕';
+}
+ul, ol {list-style: none;}
+a {text-decoration: none; color: #111;}
+
+#container {
+    position: relative;
+    width: 980px;
+    height: auto;
+    margin: 0 auto;
+}
+
+/* 헤더영역 */
+header {
+    position: relative;
+    width: 100%;
+    height: auto;
+    background-image: url('../images/admin_bg.jpg');
+    padding: 12px;
+    box-sizing: border-box;
+}
+
+header > p {
+    float: right;            
+}
+header > p > a {
+    color: #fff;
+}
+
+/* 왼쪽 사이드 */
+main {
+    width: 100%;
+    height: auto;
+    overflow: hidden;
+}
+main > aside {
+    float: left;
+    width: 176px;
+    height: 400px;
+    padding: 10px;
+    box-sizing: border-box;
+}       
+
+main > aside > h3 {
+    padding: 5px 20px;
+    border-radius: 20px;
+    background-color: rgb(229, 229, 229);
+    border: 1px solid rgb(204, 204, 204);            
+    font-size: 14px;
+}
+
+main > aside > ul {
+    padding: 16px;
+    box-sizing: border-box;    
+}
+main > aside > ul > li {
+    line-height: 22px;
+    margin-top: 10px;
+    
+}
+
+main > aside > ul > li.on > span {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+main > aside > ul > li > ol {
+    color:#111;
+    text-indent: 10px;
+}
+main > aside > ul > li > ol > li {
+    line-height: 22px;
+}
+main > aside > ul > li > ol > li::before {
+    content: '·';
+    margin-right: 4px;
+}
+
+main > aside ol > li > a:hover {
+    text-decoration: underline;
+}
+
+/* 메인 컨텐츠 */
+main > section {
+    float: right;
+    width: 804px;
+    min-height: 400px;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+main > section > nav > h3 {
+    font-size: 17px;
+    font-weight: bold;
+    color: #3f3f3f;
+}
+
+main > section > article {
+    margin-top: 12px;
+}
+main > section > article > h3 {
+    margin: 6px 0;
+}
+main > section > article > h3 > .more {
+    float: right;
+}
+main > section > article table {
+    width: 100%;
+    height: auto;
+    border-collapse: collapse;
+    border-spacing: 0;
+    border-top: 2px solid #333;
+    
+}
+main  > section > article table tr {
+    border-bottom: 1px dotted #999;
+}
+main  > section > article table tr > th {
+    padding: 12px;
+    background-color: #fbfbfb;
+}
+main  > section > article table tr > td {
+    padding: 12px;
+    text-align: center;
+}
+
+/* 푸터영역 */
+footer {
+    width: 100%;
+    height: auto;            
+    background-color: #353535;
+    padding: 12px;
+    box-sizing: border-box;
+}
+
+footer > p {
+    color: #fff;
+}
+
+/* 상품관리(목록) */
+#productList {}
+#productList > article {}
+#productList > article > table {}
+#productList table {}
+#productList table .thumb {
+    width: 60px;
+}
+#productList > article > p {            
+    padding: 10px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+#productList .productDelete {
+    float: left;            
+}
+
+#productList .productRegister {
+    float: right;            
+}
+#productList .productRegister {
+    padding: 6px 12px;            
+    border-radius: 20px;
+    border: 1px solid #ccc;
+}
+
+#productList .productRegister:hover {
+    background-color: #ccc;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+#productList .paging {            
+    text-align: center;
+}
+
+#productList .paging > .on {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+/* 상품관리(등록) */
+#productRegister {}
+#productRegister > article {}
+
+#productRegister table {}
+#productRegister table tr {}
+#productRegister table tr > td {
+    text-align: left;
+}
+#productRegister table tr > td:first-child {
+    width: 20%;
+}
+
+#productRegister table tr > td > label {
+    margin-right: 16px;
+}
+#productRegister table tr > td > p {
+    margin-bottom: 8px;
+}
+#productRegister table tr > td > p > span {
+    display: block;
+    margin-bottom: 2px;
+}
+
+#productRegister form > p {
+    margin: 12px 0;
+    text-align: center;
+}
+
+
+#productRegister form .btnCancel {
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+}
+
+#productRegister form input[type=submit] {
+    padding: 6px 12px;            
+    border-radius: 20px;
+    border: 1px solid #ccc;
+}
+
+#productRegister form input[type=submit]:hover {
+    background-color: #ccc;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+/* 주문관리 */
+#orderList > article > p {            
+    padding: 10px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+#orderList .paging {
+    text-align: center;
+}
+
+#orderList .paging > .on {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+/* orderDetail */
+#orderDetail {}
+#orderDetail > article {}
+#orderDetail > article > table {}
+#orderDetail table {}
+#orderDetail table .thumb {
+    width: 60px;
+}
+#orderDetail > article > p {
+    padding: 10px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+#orderDetail .productDelete {
+    float: left;
+}
+
+#orderDetail .productRegister {
+    float: right;
+}
+#orderDetail .productRegister {
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+}
+
+#orderDetail .productRegister:hover {
+    background-color: #ccc;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+#orderDetail .paging {
+    text-align: center;
+}
+
+#orderDetail .paging > .on {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+#orderDetail nav > h3 {
+    font-size: 17px;
+    margin-top: 20px;
+    font-weight: bold;
+    color: #3f3f3f;
+}
+
+/* 유저관리(목록) */
+#userList {}
+#userList > article {}
+#userList > article > table {}
+#userList table {
+}
+#userList table .thumb {
+    width: 60px;
+}
+#userList td {
+    height: 35px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+#userList th:nth-child(1),
+#userList td:nth-child(1) { /* 첫 번째 열 */
+    width: 35px;
+}
+
+#userList th:nth-child(2),
+#userList td:nth-child(2) { /* 두 번째 열 */
+    width: 8%;
+}
+
+#userList th:nth-child(3),
+#userList td:nth-child(3) { /* 세 번째 열 */
+    width: 10%;
+}
+
+#userList th:nth-child(4),
+#userList td:nth-child(4) { /* 네 번째 열 */
+    width: auto;
+}
+
+#userList th:nth-child(5),
+#userList td:nth-child(5) { /* 다섯 번째 열 */
+    width: 15%;
+}
+
+#userList th:nth-child(6),
+#userList td:nth-child(6) { /* 여섯 번째 열 */
+    width: 10%;
+}
+
+#userList th:nth-child(7),
+#userList td:nth-child(7) { /* 일곱 번째 열 */
+    width: 14%;
+}
+
+#userList th:nth-child(8),
+#userList td:nth-child(8) { /* 여덟 번째 열 */
+    width: 13%;
+}
+
+
+#userList > article > p {
+    padding: 10px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+#userList .productDelete {
+    float: left;
+}
+
+#userList .productRegister {
+    float: right;
+}
+#userList .productRegister {
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+}
+
+#userList .productRegister:hover {
+    background-color: #ccc;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+#userList .paging {
+    text-align: center;
+}
+
+#userList .paging > .on {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+
+
+/* userDetail */
+#userDetail {}
+#userDetail > article {}
+
+#userDetail table {}
+#userDetail table tr {}
+#userDetail table tr > td {
+    text-align: left;
+}
+#userDetail table tr > td:first-child {
+    width: 12%;
+}
+
+#userDetail table tr:not(:first-child) > td:first-child {
+    width: auto; /* "addr2", "addr3" 열의 너비를 자동으로 설정 */
+    text-align: left; /* 왼쪽 정렬 적용 */
+}
+
+#userDetail table tr > td > label {
+    margin-right: 16px;
+}
+#userDetail table tr > td > p {
+    margin-bottom: 8px;
+}
+#userDetail table tr > td > p > span {
+    display: block;
+    margin-bottom: 2px;
+}
+
+#userDetail form > p {
+    margin: 12px 0;
+    text-align: center;
+}
+
+form[name="userDetailForm"] table input {
+    border: 1px solid #ccc;
+    width: 35%;
+    padding: 5px;
+}
+
+#userDetail form .btnCancel {
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+}
+
+#userDetail form input[type=submit] {
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+}
+
+#userDetail form input[type=submit]:hover {
+    background-color: #ccc;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+/* userRegister */
+#userRegister {}
+#userRegister > article {}
+
+#userRegister table {}
+#userRegister table tr {}
+#userRegister table tr > td {
+    text-align: left;
+}
+#userRegister table tr > td:first-child {
+    width: 20%;
+}
+
+#userRegister table tr:not(:first-child) > td:first-child {
+    width: auto; /* "addr2", "addr3" 열의 너비를 자동으로 설정 */
+    text-align: left; /* 왼쪽 정렬 적용 */
+}
+
+#userRegister table tr > td > label {
+    margin-right: 16px;
+}
+#userRegister table tr > td > p {
+    margin-bottom: 8px;
+}
+#userRegister table tr > td > p > span {
+    display: block;
+    margin-bottom: 2px;
+}
+
+form[name="userRegisterForm"] table input {
+    border: 1px solid #ccc;
+    width: 35%;
+    padding: 5px;
+}
+
+form[name="userRegisterForm"] table button {
+    margin-left: 5px;
+    background-color: #f4f4f4;
+    border: 1px solid #ccc;
+    color: #333;
+    padding: 6px 12px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+}
+
+form[name="userRegisterForm"] table button:hover {
+    background-color: #ddd;
+}
+
+form[name="userRegisterForm"] table .addressInput {
+    width: 70%;
+}
+
+#userRegister form > p {
+    margin: 12px 0;
+    text-align: center;
+}
+#userRegister form .btnCancel {
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+}
+
+
+#userRegister form input[type=submit] {
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+}
+
+#userRegister form input[type=submit]:hover {
+    background-color: #ccc;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+.invalid-feedback {
+    color: red;
+}
+
+.valid-feedback{
+    color: green;
+}

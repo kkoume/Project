@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <head>
+        <meta charset="UTF-8">
+        <title>팜스토리</title>
+        <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css"/>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/bxslider/4.2.12/jquery.bxslider.css"/>
+        <link rel="stylesheet" th:href="@{/css/styles.css}"/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/bxslider/4.2.12/jquery.bxslider.min.js"></script>
+        <script>
+            $(function(){
+                $('.slider > ul').bxSlider({
+                    slideWidth: 980,
+                    pager: false,
+                    controls: false,
+                    auto: true
+                });
+
+                $('#tabs').tabs();
+            });
+        </script>
+    </head>
+    <body>
+        <div id="container">
+            <header>
+                <a th:href="@{/index}" class="logo"><img th:src="@{/assets/img/logo.png}" alt="로고"/></a>
+                <p>
+                    <a th:href="@{/index}">HOME |</a>
+                    <th:block th:if="${#authentication.principal != 'anonymousUser'}">
+                        <a th:href="@{/user/logout}">로그아웃 |</a>
+                    </th:block>
+                    <th:block th:if="${#authentication.principal == 'anonymousUser'}">
+                        <a th:href="@{/user/login}">로그인 | </a>
+                    </th:block>
+                    <th:block th:if="${#authentication.principal != 'anonymousUser'}">
+                        <a th:href="@{/my/setting(uid=${#authentication.principal.user.uid})}">마이페이지 | </a>
+                    </th:block>
+                    <a th:href="@{/user/terms}">회원가입 |</a>
+                    <a href="#">고객센터</a>
+                </p>
+                <img th:src="@{/assets/img/head_txt_img.png}" alt="3만원 이상 무료배송"/>
+
+                <ul class="gnb">
+                    <li><a th:href="@{/introduction/hello}">팜스토리소개</a></li>
+                    <li><a th:href="@{/market/list}"><img th:src="@{/assets/img/head_menu_badge.png}" alt="30%"/>장바구니</a></li>
+                    <li><a th:href="@{/croptalk/story}">농작물이야기</a></li>
+                    <li><a th:href="@{/event/event}">이벤트</a></li>
+                    <li><a th:href="@{/community/notice_list}">커뮤니티</a></li>
+                </ul>
+            </header>
+
+            <main layout:fragment="content">
+
+            </main>
+
+
+            <footer>
+                <img th:src="@{/assets/img/footer_logo.png}" alt="로고"/>
+                <p>
+                    (주)팜스토리 / 사업자등록번호 123-45-67890 / 통신판매업신고 제 2013-팜스토리구-123호 / 벤처기업확인 서울지방중소기업청 제 012345678-9-01234호<br />
+                    등록번호 팜스토리01234 (2013.04.01) / 발행인 : 홍길동<br />
+                    대표 : 홍길동 / 이메일 : email@mail.mail / 전화 : 01) 234-5678 / 경기도 성남시 잘한다구 신난다동 345<br />
+                    <em>Copyright(C)홍길동 All rights reserved.</em>
+                    <a style="float: right" href="#">[[${appInfo.name}]]-[[${appInfo.version}]]</a>
+                </p>
+            </footer>
+        </div>
+    </body>
+</html>

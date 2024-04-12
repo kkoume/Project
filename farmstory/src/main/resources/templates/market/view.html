@@ -1,0 +1,184 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout/marketLayout.html}">
+<article class="view" layout:fragment="content">
+    <script>
+        window.onload = function (){
+                 const btnCart = document.getElementById('btnCart')
+                const btnCartView = document.getElementById('btnCartView');
+
+                 const btnOrder = document.getElementById('btnOrder');
+                const  buyDirect =document.getElementById('buyDirect');
+
+                const  total = document.getElementById('total');
+                const count = document.getElementById('count');
+            //${#numbers.formatDecimal(product.prodPrice* (100 - product.prodDiscount)*0.01 , 1, 0)
+            const productPrice = [[${product.prodPrice}]];
+            const prodDiscount = [[${product.prodDiscount}]];
+            //수량
+            count.onclick=function (){
+                totalPrice()
+            }
+            totalPrice()
+
+                //바로 결제
+            btnOrder.onclick= function (e){
+                e.preventDefault();
+                try{
+                    const userForDirect = document.getElementById('userForDirect').value;
+
+                    const inputProd = document.getElementById('prodNumber');
+                    inputProd.value = document.getElementById('prodNo').value;
+
+                    const inputCount = document.getElementById('countNo');
+                    inputCount.value = document.getElementById('count').value;
+
+                    buyDirect.click();
+                }catch {
+                    alert('로그인 후 이용해주세요');
+                }
+            }
+
+
+                //장바구니 (추후에 user 추가!)
+            btnCart.onclick=async function (e) {
+                e.preventDefault();
+                //상품번호 + 상품 주문 수량 넘기기
+                const prodNo = document.getElementById('prodNo').value;
+                const count = document.getElementById('count').value;
+                var userId = null;
+                try {
+                   userId  = document.getElementById('userId').value;
+                    const jsonData = {prodNo: prodNo, count: count , userId : userId};
+                    console.log(jsonData.count+"!!");
+                    const response = await fetchPost('/farmstory/market/cart', jsonData)
+                    console.log(response+"!!");
+                    if(response.result === 'success'){
+                        console.log('성공!!');
+                        btnCartView.click();
+                    }
+                }catch{
+                    alert('로그인 후 이용해주세요')
+                }
+            }
+            function numberWithCommas(x) {
+                return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+            function totalPrice(){
+                let totalPrice = productPrice * (100 - prodDiscount) * 0.01 * count.value;
+
+                total.innerText =numberWithCommas (totalPrice) +'원';
+            }
+        }
+    </script>
+    <nav>
+        <img th:src="@{/assets/img/sub_nav_tit_cate2_tit1.png}" alt="장보기"/>
+        <p>
+            HOME > 장보기 > <em>장보기</em>
+        </p>
+    </nav>
+    <!-- 내용 시작 -->
+    <h3>기본정보</h3>
+    <div class="basic">
+        <img th:src="@{/uploads/__${product.image2}__}" class="thumb" alt="샘플1" style="width: 250px">
+
+        <table border="0">
+            <tr>
+                <td>상품명</td>
+                <td>[[${product.prodName}]]</td>
+            </tr>
+            <tr>
+                <td>상품코드</td>
+                <td>[[${product.prodNo}]]</td>
+            </tr>
+            <tr>
+                <td>배송비</td>
+                <td>
+                    <span>5,000</span>원
+                    <em>3만원 이상 무료배송</em>
+                </td>
+            </tr>
+            <tr>
+                <td>(할인적용 된) 판매가격</td>
+                <td><strong class="price"
+                            th:text="${#numbers.formatDecimal(product.prodPrice* (100 - product.prodDiscount)*0.01 , 1, 0)}"
+                >
+
+                </strong></td>
+            </tr>
+            <tr>
+                <td>구매수량</td>
+                <td>
+                        <input type="hidden" id="prodNo" th:value="${product.getProdNo()}">
+                    <th:block th:if="${#authentication.principal != 'anonymousUser'}">
+                        <input type="hidden" id="userId" th:value="${#authentication.principal.user.uid}">
+                    </th:block>
+                        <input type="number" name="count" id="count" min="1" value="1">
+                </td>
+            </tr>
+            <tr>
+                <td>합계</td>
+                <td class="total" id="total"></td>
+            </tr>
+        </table>
+        <div style="float: right; margin-top: 10px;">
+            <a href="/" id="btnCart" class="btn btnCart">장바구니</a>
+            <a href="/" id="btnOrder" class="btn btnOrder">바로구매</a>
+
+            <form th:action="@{/market/cart}" method="get">
+                <th:block th:if="${#authentication.principal != 'anonymousUser'}">
+                <input type="hidden" id="user" name="user" th:value="${#authentication.principal.user.uid}">
+                </th:block>
+                <button type="submit" id="btnCartView"></button>
+            </form>
+
+            <form th:action="@{/market/buyDirect}" method="get">
+                <th:block th:if="${#authentication.principal != 'anonymousUser'}">
+                <input type="hidden"  name="user" id="userForDirect" th:value="${#authentication.principal.user.uid}">
+                </th:block>
+                <input type="hidden"  id="prodNumber" name="prodNumber" value="">
+                <input type="hidden"  id="countNo"  name="countNo" value="">
+                <button type="submit" id="buyDirect"></button>
+            </form>
+
+        </div>
+    </div>
+    <h3>상품설명</h3>
+    <div class="detail">
+        <img th:src="@{/uploads/__${product.image3}__}" class="thumb" alt="샘플1" style="width: 760px; text-align: center">
+    </div>
+    <h3>배송정보</h3>
+    <div class="delivery">
+        <p>
+            입금하신 이후 택배송장번호는 SMS(문자서비스)를 통해 고객님께 안내해드립니다.
+        </p>
+    </div>
+
+    <h3>교환/반품</h3>
+    <div class="exchange">
+        <table border="0">
+            <tr>
+                <td>교환 반품이 가능한 경우</td>
+                <td>
+                    <ul>
+                        <li>팜스토리 상품에 하자가 있거나 불량인 경우</li>
+                        <li>채소, 과일, 양곡등의 식품은 만1일 이내</li>
+                        <li>기타 상품은 수령일로부터 영업일 기준 일주일 이내</li>
+                        <li>받으신 상품이 표시사항과 다른 경우에는 받으신 날로부터 일주일 이내</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td>교환 반품이 불가능한 경우</td>
+                <td>
+                    <ul>
+                        <li>신선 식품의 경우 단순히 마음에 들지 않는 경우</li>
+                        <li>단순 변심으로 상품이 가치가 훼손돼서 판매가 어려운 경우</li>
+                    </ul>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <!-- 내용 끝 -->
+</article>
+</html>

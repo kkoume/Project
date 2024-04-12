@@ -1,0 +1,96 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/admin/layout/adminLayout.html}">
+
+<section id="userDetail" layout:fragment="content">
+
+    <nav>
+        <h3>유저 상세</h3>
+    </nav>
+    <article>
+        <form th:action="@{/user/modify}" method="post" name="userDetailForm">
+            <table border="0">
+                <tr>
+                    <td>아이디</td>
+                    <td>
+                        [[${user.uid}]]
+                    </td>
+                </tr>
+                <tr>
+                    <td>이름</td>
+                    <td>
+                        [[${user.name}]]
+                    </td>
+                </tr>
+                <tr>
+                    <td>별명</td>
+                    <td>
+                        [[${user.nick}]]
+                    </td>
+                </tr>
+                <tr>
+                    <td>이메일</td>
+                    <td>
+                        [[${user.email}]]
+                    </td>
+                </tr>
+                <tr>
+                    <td>휴대폰</td>
+                    <td>
+                        [[${user.hp}]]
+                    </td>
+                </tr>
+                <tr>
+                    <td>등급</td>
+                    <td>
+                        <select name="grade" disabled onchange="saveGrade(this)" th:data-uid="${user.uid}">
+                            <option th:selected="${user.getGrade() eq '1'}" value="1">Bronze</option>
+                            <option th:selected="${user.getGrade() eq '2'}" value="2">Silver</option>
+                            <option th:selected="${user.getGrade() eq '3'}" value="3">Gold</option>
+                            <option th:selected="${user.getGrade() eq '4'}" value="4">Platinum</option>
+                            <option th:selected="${user.getGrade() eq '5'}" value="5">Diamond</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td rowspan="3">주소</td>
+                    <td>
+                        [[${user.zip}]]
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        [[${user.addr1}]]
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        [[${user.addr2}]]
+                    </td>
+                </tr>
+                <tr>
+                    <td>가입일</td>
+                    <td th:text="${#temporals.format(user.regDate, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                </tr>
+                <tr>
+                    <td>적립포인트</td>
+                    <td>
+                        [[${user.totalPoint}]]
+                    </td>
+                </tr>
+                <tr>
+                    <td>총 구매금액</td>
+                    <td>
+                        [[${user.totalPrice}]]
+                    </td>
+                </tr>
+            </table>
+            <p>
+                <a th:href="@{/admin/user/list}" class="btnCancel">뒤로가기</a>
+                <!-- <input type="submit" id="btnSubmit" value="수정완료"/> -->
+            </p>
+        </form>
+    </article>
+</section>
+
+</html>

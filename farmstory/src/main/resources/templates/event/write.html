@@ -1,0 +1,68 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout/articleLayout.html}">
+
+<div id="sub" layout:fragment="content">
+    <script>
+        window.onload = function (){
+            //cateName이 일치하면 li ~~ 이쪽에 class = "on"을 주고싶다.
+            const classOnTarget =  document.getElementById('[[${cateName.cate}]]');
+            classOnTarget.classList.add("on");
+        }
+    </script>
+    <div><img  th:src="@{/assets/img/sub_top_tit3.png}" alt="EVENT"></div>
+    <section class="event">
+        <aside>
+            <img th:src="@{/assets/img/sub_aside_cate3_tit.png}" alt="이벤트"/>
+
+            <ul class="lnb">
+                <li class="" id="event"><a th:href="@{/event/list(cate='story')}">이벤트</a></li>
+            </ul>
+
+        </aside>
+        <article>
+            <nav>
+                <img th:src="@{/assets/img/__${cateName.cate}__.png}" alt="이벤트"/> <!-- ??-->
+                <p>
+                    HOME > 이벤트 > <em>[[${cateName.boardName}]]</em> <!-- 완료 -->
+                </p>
+            </nav>
+
+            <!-- 내용 시작 -->
+            <div id="board">
+                <section class="write">
+                    <form th:action="@{/event/write}" name="formWrite" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="writer" th:value="${#authentication.principal.user.uid}" />
+                        <input type="hidden" name="cate" th:value="${cateName.getCate()}" />
+                        <input type="hidden" name="nick" th:value="${#authentication.principal.user.nick}" />
+                        <table border="0">
+                            <tr>
+                                <th>제목</th>
+                                <td><input type="text" name="title" placeholder="제목을 입력하세요."/></td>
+                            </tr>
+                            <tr>
+                                <th>내용</th>
+                                <td>
+                                    <textarea name="content"></textarea>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>파일</th>
+                                <td>
+                                    <input type="file" name="files" multiple="multiple" pl/><br>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div>
+                            <a th:href="@{/event/list(cate=${cateName.cate})}" class="btn btnCancel">취소</a>
+                            <input type="submit" value="작성완료" class="btn btnComplete" id="formFileMultiple" multiple/>
+                        </div>
+                    </form>
+                </section>
+            </div>
+            <!-- 내용 끝 -->
+        </article>
+    </section>
+</div>
+</html>

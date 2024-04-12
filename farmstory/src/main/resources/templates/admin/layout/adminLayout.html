@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <title>팜스토리</title>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/bxslider/4.2.12/jquery.bxslider.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/bxslider/4.2.12/jquery.bxslider.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/admin/css/style.css}">
+    <script th:src="@{/js/util.js}"></script>
+    <style></style>
+</head>
+
+<body>
+<div id="container">
+    <header>
+        <a th:href="@{/admin/index}" class="logo"><img th:src="@{/admin/images/admin_logo.jpg}" alt="로고"/></a>
+        <p>
+            <a th:href="@{/index}">HOME |</a>
+            <a th:href="@{/user/logout}">로그아웃 |</a>
+            <a href="#">고객센터</a>
+        </p>
+    </header>
+    <!--main-->
+    <main>
+        <aside>
+            <h3>주요기능</h3>
+            <ul>
+                <li>
+                    <span>상품관리</span>
+                    <ol>
+                        <li><a th:href="@{/admin/product/list}">상품목록</a></li>
+                        <li><a th:href="@{/admin/product/register}">상품등록</a></li>
+                    </ol>
+                </li>
+                <li>
+                    <span>주문관리</span>
+                    <ol>
+                        <li><a th:href="@{/admin/order/list}">주문목록</a></li>
+                      <!--  <li><a th:href="@{/admin/order/delivery}">배송관리</a></li> -->
+                    </ol>
+                </li>
+                <li>
+                    <span>회원관리</span>
+                    <ol>
+                        <li><a th:href="@{/admin/user/list}">회원목록</a></li>
+                        <li><a th:href="@{/admin/user/register}">회원등록</a></li>
+                    </ol>
+                </li>
+            </ul>
+        </aside>
+        <section  layout:fragment="content">
+
+        </section>
+    </main>
+    <footer>
+        <p>
+            (주)팜스토리 / 사업자등록번호 123-45-67890 / 통신판매업신고 제 2013-팜스토리구-123호 / 벤처기업확인 서울지방중소기업청 제 012345678-9-01234호<br />
+            등록번호 팜스토리01234 (2013.04.01) / 발행인 : 홍길동<br/>
+            대표 : 홍길동 / 이메일 : email@mail.mail / 전화 : 01) 234-5678 / 경기도 성남시 잘한다구 신난다동 345<br/>
+            <em>Copyright(C)홍길동 All rights reserved.</em>
+            <a style="float: right" href="#">[[${appInfo.name}]]-[[${appInfo.version}]]</a>
+        </p>
+    </footer>
+</div>
+
+</body>
+</html>

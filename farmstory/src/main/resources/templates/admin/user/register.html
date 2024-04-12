@@ -1,0 +1,368 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/admin/layout/adminLayout.html}">
+
+<section id="userRegister" layout:fragment="content">
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script>
+
+        //유효성 검사에 사용할 상태변수
+        let isUidOk   = false;
+        let isPassOk  = false;
+        let isNameOk  = false;
+        let isNickOk  = false;
+        let isEmailOk = false;
+        let isHpOk    = false;
+
+        // 유효성 검사에 사용할 정규표현식
+        const reUid   = /^[a-z]+[a-z0-9]{4,19}$/g;
+        const rePass  = /^(?=.*[a-zA-z])(?=.*[0-9])(?=.*[$`~!@$!%*#^?&\\(\\)\-_=+]).{5,16}$/;
+        const reName  = /^[가-힣]{2,10}$/
+        const reNick  = /^[a-zA-Zㄱ-힣0-9][a-zA-Zㄱ-힣0-9]*$/;
+        const reEmail = /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
+        const reHp    = /^01(?:0|1|[6-9])-(?:\d{4})-\d{4}$/;
+
+        window.onload = function (){
+
+            // 아이디 유효성 검사
+            const inputUid = document.getElementById('inputUid');
+            const resultUid = document.getElementById('resultUid');
+            const btnCheckUid = document.getElementById('btnCheckUid');
+
+            btnCheckUid.onclick = function() {
+                const type = this.getAttribute('data-type');
+                const value = inputUid.value;
+                showResultValid(resultUid, '');
+
+                console.log('value : ' + value);
+                console.log('type : ' + type);
+
+                // 정규식 검사
+                if (!value.match(reUid)) {
+                    showResultInvalid(resultUid, '아이디 형식이 맞지 않습니다.');
+                    isUidOk = false;
+                    return;
+                }
+
+                setTimeout(async () => {
+
+                    const data = await fetchGet(`/farmstory/user/${type}/${value}`);
+
+                    if (data.result > 0) {
+                        showResultInvalid(resultUid, '이미 사용 중인 아이디 입니다.');
+                        isUidOk = false;
+                    } else {
+                        showResultValid(resultUid, '사용 가능한 아이디 입니다.');
+                        isUidOk = true;
+                    }
+                }, 1000);
+            }
+
+                // 비밀번호
+
+                const inputPasses = document.getElementsByClassName('inputPass');
+                const resultPass = document.getElementById('resultPass');
+
+                inputPasses[1].addEventListener('focusout', ()=>{
+                    showResultValid(resultPass, '');
+
+                    if(inputPasses[0].value == inputPasses[1].value){
+
+                        if(!inputPasses[0].value.match(rePass)){
+                            showResultInvalid(resultPass, '비밀번호 형식에 맞지 않습니다.');
+                            isPassOk = false;
+                        }else{
+                            showResultValid(resultPass, '사용 가능한 비밀번호 입니다.');
+                            isPassOk = true;
+                        }
+
+                    }else{
+                        showInputInvalid(inputPasses);
+                        showResultInvalid(resultPass, '비밀번호가 일치하지 않습니다.');
+                        isPassOk = false;
+                    }
+                });
+
+                // 이름 유효성 검사
+                const inputNames = document.getElementsByClassName('inputName');
+                const resultName = document.getElementById('resultName');
+
+                inputNames[0].addEventListener('focusout', ()=>{
+
+                    const value = inputNames[0].value;
+
+                    if(!value.match(reName)){
+                        showInputInvalid(inputNames);
+                        showResultInvalid(resultName, '이름 형식이 맞지 않습니다.');
+                        isNameOk = false;
+                    }else{
+                        showInputValid(inputNames);
+                        showResultValid(resultName, '');
+                        isNameOk = true;
+                    }
+                });
+
+                // 별명 유효성 검사
+                const inputNick = document.getElementById('inputNick');
+                const resultNick = document.getElementById('resultNick');
+                const btnCheckNick = document.getElementById('btnCheckNick');
+
+                btnCheckNick.onclick = function() {
+                    const type    = this.getAttribute('data-type');
+                    const value   = inputNick.value;
+                    showResultValid(resultNick, '');
+
+                    console.log('value : ' + value);
+                    console.log('type : ' + type);
+
+                    // 정규식 검사
+                    if(!value.match(reNick)) {
+                        showResultInvalid(resultNick, '별명 형식이 맞지 않습니다.');
+                        isNickOk = false;
+                        return;
+                    }
+
+                    setTimeout(async () => {
+
+                        const data = await fetchGet(`/farmstory/user/${type}/${value}`);
+
+                        if (data.result > 0) {
+                            showResultInvalid(resultNick, '이미 사용 중인 별명 입니다.');
+                            isNickOk = false;
+                        } else {
+                            showResultValid(resultNick, '사용 가능한 별명 입니다.');
+                            isNickOk = true;
+                        }
+                    }, 1000);
+                }
+
+            // 휴대폰 유효성 검사
+            const inputHp = document.getElementById('inputHp');
+            const resultHp = document.getElementById('resultHp');
+            const btnCheckHp = document.getElementById('btnCheckHp');
+
+            btnCheckHp.onclick = function() {
+                const type    = this.getAttribute('data-type');
+                const value   = inputHp.value;
+                showResultValid(resultHp, '');
+
+                console.log('value : ' + value);
+                console.log('type : ' + type);
+
+                // 정규식 검사
+                if(!value.match(reHp)) {
+                    showResultInvalid(resultHp, '번호 형식이 맞지 않습니다.');
+                    isHpOk = false;
+                    return;
+                }
+
+                setTimeout(async () => {
+
+                    const data = await fetchGet(`/farmstory/user/${type}/${value}`);
+
+                    if (data.result > 0) {
+                        showResultInvalid(resultHp, '이미 사용 중인 번호 입니다.');
+                        isHpOk = false;
+                    } else {
+                        showResultValid(resultHp, '사용 가능한 번호 입니다.');
+                        isHpOk = true;
+                    }
+                }, 1000);
+            }
+
+            // 이메일 유효성 검사
+            const inputEmail = document.getElementById('inputEmail');
+            const resultEmail = document.getElementById('resultEmail');
+            const btnCheckEmail = document.getElementById('btnEmail');
+
+            btnCheckEmail.onclick = function() {
+                const type    = this.getAttribute('data-type');
+                const value   = inputEmail.value;
+                showResultValid(resultEmail, '');
+
+                console.log('value : ' + value);
+                console.log('type : ' + type);
+
+                // 정규식 검사
+                if(!value.match(reEmail)) {
+                    showResultInvalid(resultEmail, '메일 형식이 맞지 않습니다.');
+                    isEmailOk = false;
+                    return;
+                }
+
+                setTimeout(async () => {
+
+                    const data = await fetchGet(`/farmstory/user/${type}/${value}`);
+
+                    if (data.result > 0) {
+                        showResultInvalid(resultEmail, '이미 사용 중인 메일 입니다.');
+                        isEmailOk = false;
+                    } else {
+                        showResultValid(resultEmail, '인증코드가 발송 되었습니다.');
+                        isEmailOk = true;
+                    }
+                }, 1000);
+            }
+
+            // 이메일 인증코드 확인
+            const inputEmailCodes = document.getElementsByClassName('inputEmailCode');
+            const btnCheckEmailCode = document.getElementById('btnCheckEmailCode');
+
+            btnCheckEmailCode.onclick = async function (){
+                showResultValid(resultEmail, '');
+
+                const value = inputEmailCodes[0].value;
+                console.log("checkEmailCode... "+value);
+
+                const data = await fetchGet(`/farmstory/email/${value}`);
+
+                if(!data.result){
+                    showResultInvalid(resultEmail, '인증코드가 일치하지 않습니다.');
+                    isEmailOk = false;
+                }else{
+                    showResultValid(resultEmail, '이메일이 인증되었습니다.');
+                    isEmailOk = true;
+                }
+            }
+
+
+            // 우편번호 주소검색
+            // 다음 우편번호 API 스크립트 상단 추가, postcode 함수 util.js 파일 추가
+            const btnZip = document.getElementById('btnZip');
+            btnZip.onclick = function () {
+                postcode();
+            }
+
+            // 최종 유효성 검사 확인
+            document.userRegisterForm.onsubmit = function (){
+
+                if(!isUidOk){
+                    alertModal('아이디가 유효하지 않습니다.');
+                    return false;
+                }
+
+                if(!isPassOk){
+                    alertModal('비밀번호가 유효하지 않습니다.');
+                    return false;
+                }
+
+                if(!isNameOk){
+                    alertModal('이름이 유효하지 않습니다.');
+                    return false;
+                }
+
+                if(!isNickOk){
+                    alertModal('별명이 유효하지 않습니다.');
+                    return false;
+                }
+
+                if(!isEmailOk){
+                    alertModal('이메일이 유효하지 않습니다.');
+                    return false;
+                }
+
+                if(!isHpOk){
+                    alertModal('휴대폰이 유효하지 않습니다.');
+                    return false;
+                }
+
+                // 폼 전송
+                return true;
+            }
+
+        }
+    </script>
+    <nav>
+        <h3>유저 등록</h3>
+    </nav>
+    <article>
+        <form th:action="@{/user/register}" method="post" name="userRegisterForm">
+            <table border="0">
+                <tr>
+                    <td>아이디</td>
+                    <td>
+                        <input class="inputUid" type="text" id="inputUid" name="uid"/>
+                        <button type="button" id="btnCheckUid" data-type="uid">중복확인</button>
+                        <div id="resultUid" class="d-block"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td rowspan="2">비밀번호</td>
+                    <td>
+                        <input type="password" class="inputPass" name="pass" placeholder="비밀번호 입력"/>
+                        <div id="resultPass" class="d-block"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><input type="password" class="inputPass" name="pass1" placeholder="비밀번호 입력확인"/></td>
+                </tr>
+                <tr>
+                    <td>이름</td>
+                    <td>
+                        <input type="text" class="inputName" id="inputName" name="name"/>
+                        <div id="resultName" class="d-block"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>별명</td>
+                    <td>
+                        <input class="inputNick" type="text" id="inputNick" name="nick"/>
+                        <button type="button" id="btnCheckNick" data-type="nick">중복확인</button>
+                        <div id="resultNick" class="d-block"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>휴대폰</td>
+                    <td>
+                        <input class="inputHp" type="text" id="inputHp" name="hp"/>
+                        <button type="button" id="btnCheckHp" data-type="hp">중복 확인</button>
+                        <div id="resultHp" class="d-block"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td rowspan="2">이메일</td>
+                    <td>
+                        <input type="text" id="inputEmail" name="email"/>
+                        <button type="button" id="btnEmail" data-type="email">인증코드 전송</button>
+                        <div id="resultEmail" class="d-block"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="text" class="inputEmailCode" name="code" placeholder="이메일 인증코드를 입력하세요"/>
+                        <button type="button" id="btnCheckEmailCode" data-type="email">인증코드 확인</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>직위</td>
+                    <td>
+                        <select id="inputRole" name="role">
+                            <option th:value="USER">사용자</option>
+                            <option th:value="MANAGER">관리자</option>
+                            <option th:value="ADMIN">최고관리자</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td rowspan="3">주소</td>
+                    <td>
+                        <input type="text" class="inputZip" id="inputZip" name="zip" placeholder="우편번호 검색" readonly/>
+                        <button type="button" id="btnZip">우편번호 검색</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td><input type="text" class="inputAddr1" id="inputAddr1" name="addr1" placeholder="기본주소 입력" readonly/></td>
+                </tr>
+                <tr>
+                    <td><input type="text" class="inputAddr2" id="inputAddr2" name="addr2" placeholder="상세주소 입력"/></td>
+                </tr>
+            </table>
+            <p>
+                <a th:href="@{/admin/user/list}" class="btnCancel">취소</a>
+                <input type="submit" id="btnSubmit" value="유저등록"/>
+            </p>
+        </form>
+    </article>
+</section>
+
+</html>

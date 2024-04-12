@@ -1,0 +1,125 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/admin/layout/adminLayout.html}">
+
+<section id="orderDetail" layout:fragment="content">
+    <script>
+    window.onload=function (){
+        const fees = document.querySelectorAll('.fee');
+        var fee =0;
+        fees.forEach(value => {
+            console.log(value.innerText);
+            fee += parseInt(value.innerText)
+        })
+
+        const discounts = document.querySelectorAll('.discount');
+        var discount = 0;
+        discounts.forEach(value=>{
+            discount+=parseInt(value.innerText);
+        })
+        document.getElementById('totalFee').innerText=fee +' KRW';
+        if(fee>30000){
+            document.getElementById('delivery').innerText='0 KRW';
+        }else{
+            document.getElementById('delivery').innerText='5,000 KRW';
+        }
+        document.getElementById('totalDiscount').innerText=discount +' KRW';
+    }
+    </script>
+    <nav>
+        <h3>주문상세(orderNo)</h3>
+    </nav>
+
+        <article>
+            <table border="0">
+                <tr>
+                    <th>이미지</th>
+                    <td>종류</td>
+                    <td>상품명</td>
+                    <td>수량</td>
+                    <td>상품금액</td>
+                    <td>할인금액</td>
+                    <td>적립포인트</td>
+                    <td>재고</td>
+                    <td>소계</td>
+                </tr>
+                <tr th:each="product, index:${products}">
+                    <td><img th:src="@{/uploads/__${product.image1}__}"  class="thumb" alt="샘플1"></td>
+                    <td>[[${cates[index.index]}]]</td>
+                    <td>[[${product.prodName}]]</td>
+                    <td>[[${orderItems[index.index].itemCount}]]</td>
+                    <td class="fee">[[${product.prodPrice * orderItems[index.index].itemCount }]]</td>
+                    <td class="discount">[[${#numbers.formatDecimal(product.prodPrice *product.prodDiscount *0.01 * orderItems[index.index].itemCount, 1, 0 )}]]</td>
+                    <td>[[${product.point * orderItems[index.index].itemCount}]] p</td>
+                    <td>[[${product.prodStock}]]</td>
+                    <td th:text="${#numbers.formatDecimal(product.prodPrice * (100 - product.prodDiscount )*0.01 * orderItems[index.index].itemCount , 1, 0)}"></td>
+                </tr>
+            </table>
+            <nav>
+                <h3>주문자 결재내역</h3>
+            </nav>
+            <table border="0">
+                <tr>
+                    <th>총 상품금액</th>
+                    <th> + </th>
+                    <th>배송비</th>
+                    <th> - </th>
+                    <th>포인트 사용</th>
+                    <th> - </th>
+                    <th>할인금액</th>
+                    <th> = </th>
+                    <th>총 결재금액</th>
+                </tr>
+                <tr>
+                    <td id="totalFee">64,000 KRW</td>
+                    <td> + </td>
+                    <td id="delivery">0 KRW</td>
+                    <td> - </td>
+                    <td>[[${-usedPoint}]] KRW</td>
+                    <td> - </td>
+                    <td id="totalDiscount"></td>
+                    <td> = </td>
+                    <td>[[${orders.orderTotalPrice}]] KRW</td>
+                </tr>
+            </table>
+
+            <nav>
+                <h3>주문자 정보</h3>
+            </nav>
+            <table border="0">
+                <tr>
+                    <th>[[${orders.sendName}]]</th>
+                    <td>[[${orders.sendHp}]]</td>
+                    <td>[[${orders.orderAddr}]]</td>
+                    <td>[[${orders.memo}]]</td>
+                </tr>
+            </table>
+
+            <nav>
+                <h3>받으시는 분</h3>
+            </nav>
+            <table border="0">
+                <tr>
+                    <th>이름</th>
+                    <td>핸드폰</td>
+                    <td>배송주소</td>
+                    <td>기타</td>
+                </tr>
+                <tr>
+                    <th>[[${orders.receiveName}]]</th>
+                    <td>[[${orders.receiveHp}]]</td>
+                    <td>[[${orders.orderAddr}]]</td>
+                    <td>[[${orders.memo}]]</td>
+                </tr>
+            </table>
+
+        <p>
+            <a th:href="@{/admin/order/list}" class="productRegister">뒤로가기</a>
+        </p>
+
+
+    </article>
+
+</section>
+
+</html>
